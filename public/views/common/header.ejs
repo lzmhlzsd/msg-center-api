@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>消息中心</title>
+
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/antd/dist/antd.min.css" />
+    <!--build:css stylesheets/wapmain.min.css -->
+    <link rel='stylesheet' href='/css/main.css' />
+    <!--/build-->
+
+</head>
+<body>
+<div class="fc-body">
+<div class="header">
+    <div class="container">
+        <div class="login-container">
+            <a>
+                XXX--XXXX
+            </a>
+        </div>
+        <ul class="nav navbar-nav navbar-menu pull-left">
+            <li ><a href="/index" class="<%= menu == 'myapp' ? 'active' : ''%>">我的应用</a></li>
+            <li ><a href="#">消息模板</a></li>
+            <li ><a href="/my/app">人员管理</a></li>
+            <li ><a href="/my/app">消息日志</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-menu pull-right">
+            <li ><a href="/apis">账号：<%= user_name %></a></li>
+            <li ><a href="#">退出</a></li>
+        </ul>
+
+    </div>
+</div>
+
+

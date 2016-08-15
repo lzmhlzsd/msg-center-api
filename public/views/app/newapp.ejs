@@ -1,0 +1,107 @@
+<% include ../common/header.ejs %>
+<div class="container-body">
+    <div class="container ">
+        <% include ../common/nav.ejs %>
+        <form class="form-horizontal" style="width: 600px;margin: auto;"
+              action="/app/save" method="post">
+            <div class="form-group">
+                <label class="col-sm-2 control-label col-sm-offset-2" style="text-align: left;font-size: 16px;">
+                    创建应用
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="fd_name" class="col-sm-2 control-label">应用名称</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" name="app_name" id="app_name" placeholder="应用名称">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="fd_description" class="col-sm-2 control-label">应用描述</label>
+
+                <div class="col-sm-10">
+                <textarea rows="5" class="form-control" name="app_memo" id="app_memo"
+                          placeholder="应用描述(最大32个字符)"></textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-ant">保存</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<% include ../common/footer.ejs %>
+<script type="text/javascript" src="/jquery-validation-1.15.1/dist/jquery.validate.min.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $('.form-horizontal').validate({
+            errorElement: 'span',
+            errorClass: 'help-block',
+            focusInvalid: false,
+            rules: {
+                app_name: {
+                    required: true,
+                    remote: {
+                        type: "post",
+                        url: "/app/checkname",
+                        data: {
+                            app_name: function () {
+                                return $("#app_name").val();
+                            },
+                            app_memo: function () {
+                                return $("#app_memo").val();
+                            }
+                        },
+                        dataType: "json",
+                        dataFilter: function (data, type) {
+                            data = JSON.parse(data);
+                            if (data.status == '0000')
+                                return true;
+                            else
+                                return false;
+                        }
+                    }
+                },
+                fd_description: {
+                    maxlength: 32
+                }
+            },
+            messages: {
+                app_name: {
+                    required: "应用名称不能为空!",
+                    remote: '应用名称已经存在!'
+                },
+                app_memo: {
+                    maxlength: "请输入一个长度最多是32的字符串!"
+                }
+            },
+
+            highlight: function (element) {
+                $(element).closest('.form-group').addClass('has-error');
+            },
+
+            success: function (label) {
+                label.closest('.form-group').removeClass('has-error');
+                label.remove();
+            },
+
+            errorPlacement: function (error, element) {
+                element.parent('div').append(error);
+            },
+
+            submitHandler: function (form) {
+                form.submit();
+            }
+        });
+
+        $('.form-horizontal input').keypress(function (e) {
+            if (e.which == 13) {
+                if ($('.form-horizontal').validate().form()) {
+                    $('.form-horizontal').submit();
+                }
+                return false;
+            }
+        });
+    });
+</script>

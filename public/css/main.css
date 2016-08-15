@@ -1,0 +1,115 @@
+html, body {
+    height: 100%;
+    width: 100%;
+    font-family: "Microsoft YaHei", Verdana, Arial, Tahoma, sans-serif;
+    background-color: #fefefe;
+}
+.fc-body{
+    background: url(../images/bground.jpg);
+    background-size: auto;
+    height: 100%;
+}
+.foot{
+    width: 100%;
+    height: 100px;
+    background: #1C262E;
+}
+.header {
+    height: 64px;
+    background-color: rgba(255,255,255,.8);
+    padding: 10px;
+}
+
+.header .container {
+    height: 44px;
+    width: 900px;
+}
+
+.header .container .navbar-menu {
+    margin-left: 20px;
+}
+
+.header .container .nav a {
+    color: #666;
+}
+
+.header .login-container {
+    /*background: url(../images/yunshouding.png)no-repeat;*/
+    /*background-size: 48px 48px;*/
+    /*color: #e5e9ee;*/
+    float: left;
+    height: 50px;
+    line-height: 48px;
+}
+
+.header .login-container a {
+    color: #666;
+    cursor: pointer;
+    font-size: 18px;
+    font-family: "Microsoft YaHei", Verdana, Arial, Tahoma, sans-serif;
+}
+
+a {
+    color: #2db7f5;
+}
+
+a:hover {
+    text-decoration: none;
+    color: #2db7f5;
+}
+
+.nav li a:focus, .nav li a:hover {
+    text-decoration: none;
+    background-color: transparent;
+}
+
+.container-body {
+    min-height: 800px;
+    background-color: #ffffff;
+}
+.container-body .container{
+    padding: 15px 15px;
+    width: 900px;
+}
+
+.navbar-nav a.active{
+    border-bottom: 2px solid #2db7f5;
+    color: #2db7f5;
+}
+.nav-li{
+    margin-bottom: 8px;
+}
+.nav-li li{
+    display: inline-block;
+}
+.panel-table{
+    margin: 10px 0;
+}
+
+.btn-ant{
+    color: #fff;
+    background-color: #2db7f5;
+    border-color: #2db7f5;
+}
+.btn.focus, .btn:focus, .btn:hover {
+    color: #fff;
+    background-color: #61c7f4;
+    text-decoration: none;
+}
+.ant-table table{
+    overflow: inherit;
+}
+.ant-table{
+    overflow: inherit;
+}
+.ant-talbe-operator .dropdown-menu{
+    min-width: 100px;
+}
+.ant-talbe-operator .dropdown-menu a{
+    font-size: 13px;
+}
+.dropdown-menu>li>a:focus, .dropdown-menu>li>a:hover {
+    color: #262626;
+    text-decoration: none;
+    background-color: #eaf8fe;
+}

@@ -1,0 +1,190 @@
+<% include ../common/header.ejs %>
+<div class="container-body">
+    <div class="container " ng-app="myapp" ng-controller="appCtrl">
+        <% include ../common/nav.ejs %>
+        <div>
+            <div class="ant-search-input-wrapper pull-left" style="width: 200px;">
+                <span class="ant-input-group ant-search-input" style="    top: 7px;">
+                    <span class="ant-input-wrapper">
+                        <input type="text" placeholder="应用名称"
+                               class="ant-input"
+                               ng-model="appname">
+                    </span>
+                    <div class="ant-input-group-wrap">
+                        <button type="button" class="ant-btn ant-btn-icon-only ant-search-btn"
+                                ng-click="searchKey()">
+                            <i class="anticon anticon-search"></i>
+                        </button>
+                    </div>
+                </span>
+            </div>
+            <a class="btn btn-ant pull-right" href="/app/new">创建应用</a>
+        </div>
+        <div style="margin-top: 50px;">
+            <div class="panel-table ant-table ant-table-body">
+                <table class="">
+                    <thead class="ant-table-thead">
+                    <tr>
+                        <th>应用名称</th>
+                        <th>appKey</th>
+                        <th>应用状态</th>
+                        <th>创建日期</th>
+                        <th>描述</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in items">
+                        <td>{{item.app_name}}</td>
+                        <td>{{item.app_key}}</td>
+                        <td>{{item.app_status | appstatus}}</td>
+                        <td>{{item.app_creattime | date:'yyyy-MM-dd HH:mm:ss'}}</td>
+                        <td>{{item.app_memo}}</td>
+                        <td>
+                            <div class="btn-group">
+                                <!--<button type="button" class="btn btn-danger">Action</button>-->
+                                <!--<button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">-->
+                                    <!--<span class="caret"></span>-->
+                                    <!--<span class="sr-only">Toggle Dropdown</span>-->
+                                <!--</button>-->
+                                <span class="ant-talbe-operator">
+                                    <!--<a href="#">操作二</a>-->
+                                    <!--<span class="ant-divider"></span>-->
+                                    <a href="#" class="ant-dropdown-link dropdown-toggle"
+                                       data-toggle="dropdown"
+                                       aria-haspopup="true"
+                                       aria-expanded="false">更多<i class="anticon anticon-down"></i></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="/app/view/{{item.app_id}}">查看</a></li>
+                                        <li><a href="/app/edit/{{item.app_id}}">编辑</a></li>
+                                        <li><a href="javascript:void(0);" ng-click="deleteApp($index)">删除</a></li>
+                                        <!--<li role="separator" class="divider"></li>-->
+                                        <!--<li><a href="#">Separated link</a></li>-->
+                                    </ul>
+                                </span>
+
+
+                            </div>
+                            <!--<span>-->
+                                <!--<a href="#">操作二</a>-->
+                                <!--<span class="ant-divider"></span>-->
+                                <!--<a href="#" class="ant-dropdown-link">更多<i class="anticon anticon-down"></i></a>-->
+                            <!--</span>-->
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div style="text-align: right;margin: 10px 0;">
+                    <ul class="ant-pagination " unselectable="unselectable" style="display: inline-block;">
+                        <li title="上一页" class="ant-pagination-prev"
+                            ng-class="{1:'ant-pagination-disabled '}[searchParams.pagenum]"
+                            ng-click="prev()"
+                                ><a></a></li>
+                        <!--<li title="第一页" class="ant-pagination-item ant-pagination-item-1 ant-pagination-item-active"><a>1</a>-->
+                        <!--</li>-->
+                        <li title="{{pag.pagenum}}"
+                            class="ant-pagination-item ant-pagination-item-2"
+                            ng-class="{true:'ant-pagination-item-active'}[pag.active]"
+                            ng-repeat="pag in pagination"
+                            ng-click="turnPage(pag.pagenum)"><a>{{pag.pagenum}}</a></li>
+                        <li title="下一页"
+                            class="ant-pagination-next"
+                            ng-class="{true:'ant-pagination-disabled '}[searchParams.pagenum == searchParams.pages]"
+                            ng-click="next()"><a></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<% include ../common/footer.ejs %>
+
+<script type="text/javascript">
+    angular.module('myapp', [])
+            .controller('appCtrl', ['$scope', '$http', function ($scope, $http) {
+                $scope.items = [];
+                $scope.appname = "";
+                $scope.searchParams = {
+                    pagenum: 1,
+                    pagesize: 10,
+                    filters: {
+//                        filter:[
+//                            //{
+//                            //    filters: [
+//                            //    { field: "STOCK_TYPE", Operator: "eq", value: 1 },
+//                            //    { field: "STOCK_TYPE", Operator: "eq", value: 2 }
+//                            //    ],
+//                            //    logic: "or"
+//                            //},
+//                            //{ field: "user_id", Operator: "eq", value: dataItem.PLAN_NBR }
+//                        ],
+//                        logic: 'and'
+                    }
+                }
+
+                $scope.turnPage = function (page) {
+                    $scope.searchParams.pagenum = parseInt(page);
+                    $scope.getAppList();
+                }
+
+                $scope.prev = function () {
+                    if($scope.searchParams.pagenum > 1) {
+                        $scope.searchParams.pagenum--;
+                        $scope.getAppList();
+                    }
+                }
+
+                $scope.next = function () {
+                    if($scope.searchParams.pagenum < $scope.searchParams.pages) {
+                        $scope.searchParams.pagenum++;
+                        $scope.getAppList();
+                    }
+                }
+
+                $scope.searchKey = function () {
+                    $scope.searchParams.pagenum = 1;
+                    $scope.searchParams.filters = {
+                        filter: [
+                            {field: "app_name", Operator: "like", value: $scope.appname}
+                        ]
+                    }
+                    $scope.getAppList();
+                }
+
+                //查询数据
+                $scope.getAppList = function () {
+                    $http.post('/getAppList', $scope.searchParams)
+                            .success(function (result) {
+                                if (result.status == '0000') {
+                                    $scope.items = result.data.datasource;
+                                    $scope.searchParams.pagenum = result.data.pagenum;
+                                    $scope.searchParams.pagesize = result.data.pagesize;
+                                    $scope.searchParams.pages = result.data.pages
+                                    $scope.pagination = [];
+                                    for (var i = 1; i <= result.data.pages; i++) {
+                                        $scope.pagination.push({
+                                            pagenum: i,
+                                            active: i == result.data.pagenum ? true : false
+                                        })
+                                    }
+                                }
+                            });
+                }
+
+                $scope.getAppList();
+            }])
+            .filter('appstatus', function () {
+                return function (input) {
+                    var str;
+                    switch (input) {
+                        case 1:
+                            str = '正常';
+                            break;
+                        case 0:
+                            str = '禁用';
+                            break;
+                    }
+                    return str;
+                }
+            })
+</script>

@@ -1,0 +1,52 @@
+<% include common/login_header.ejs %>
+
+<div class="container" style="width: 400px;padding-top: 50px;" ng-module="myapp" ng-controller="appCtrl">
+    <form class="form-horizontal" method="post" action="/login">
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">账号：</label>
+
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="user_name" placeholder="账号">
+
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputPassword3" class="col-sm-2 control-label">密码：</label>
+
+            <div class="col-sm-10">
+                <input type="password" class="form-control" id="pwd" placeholder="密码">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <div id="login" class="btn btn-success btn-block">登录</div>
+            </div>
+        </div>
+    </form>
+</div>
+</div>
+
+<% include common/footer.ejs %>
+
+<script type="text/javascript">
+    $(function () {
+        $('#login').on('click', function () {
+            var params = {
+                user_name: $('#user_name').val(),
+                pwd: $('#pwd').val()
+            }
+            $.post('/login', params, function (result) {
+                if (result.status == '0000') {
+                    location.href = '/index';
+                }
+                else {
+                    BootstrapDialog.show({
+                        title: '提示',
+                        message: result.message,
+                        type: BootstrapDialog.TYPE_DANGER
+                    });
+                }
+            })
+        });
+    })
+</script>

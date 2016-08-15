@@ -1,0 +1,70 @@
+<% include ../common/header.ejs %>
+<div class="container-body">
+    <div class="container ">
+        <% include ../common/nav.ejs %>
+        <div class="row">
+            <div class="col-md-2">
+                <ul class="">
+                    <li>应用概览</li>
+                    <li>应用日志</li>
+                </ul>
+            </div>
+            <div class="col-md-10">
+                <p>appkey: <%= app.app_key%></p>
+                <p>appscrect: <%= app.app_screct%></p>
+                <div class="panel-table ant-table ant-table-body">
+                    <table class="">
+                        <thead class="ant-table-thead">
+                        <tr>
+                            <th>服务名称</th>
+                            <th>状态</th>
+                            <th>描述</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <% service.forEach(function(se) { %>
+                        <tr id='service_<%= se.service_id %>'>
+                            <td><%= se.service_name %></td>
+                            <% if(se.app_status == 0){ %>
+                            <td>未申请</td>
+                            <% } else if(se.app_status == 1){ %>
+                            <td>申请中</td>
+                            <% } else if(se.app_status == 2){ %>
+                            <td>已获得</td>
+                            <% } %>
+
+                            <td><%= se.service_memo %></td>
+                            <td>
+                                <% if(se.app_status == 0) { %>
+                                <a class="bt"
+                                   style=" margin-right: 5px;" href="javascript:void(0);"
+                                   onclick="appapply('<%= se.service_id %>','<%= app_id %>')">申请开通</a>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<% include ../common/footer.ejs %>
+<script type="text/javascript">
+    $(function () {
+
+    });
+
+    function appapply(serviceid, appid) {
+        //申请应用绑定的服务
+        $.post('/app/apply', {service_id: serviceid, app_id: appid}, function (result) {
+            if (result.status == '0000') {
+                //window.location.reload();
+                $('#service_' + serviceid).find('td').eq(1).html('申请中');
+                $('#service_' + serviceid).find('td').eq(3).html('');
+            }
+        })
+    }
+</script>
