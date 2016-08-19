@@ -29,10 +29,10 @@ exports.debug = function (msg) {
 exports.info = function (msg) {
     logger.info(msg);
 };
-exports.error = function (msg1, msg2, msg3, msg4) {
+exports.error = function (msg1, msg2, msg3, msg4, msg5) {
     console.log(JSON.stringify(msg1))
     var utool = require('./utool');
-    logger.error(utool.format('\n方法名:{0}\n动作:{1}\n参数:{2}\n错误:{3}\n*******************************************************************', [msg1, msg2, JSON.stringify(msg3), msg4]));
+    logger.error(utool.format('\n方法名:{0}\n动作:{1}\n参数:{2}\n错误:{3}\n描述:{4}\n*******************************************************************', [msg1, msg2, JSON.stringify(msg3), msg4, msg5]));
 };
 exports.warn = function (msg) {
     logger.warn(msg);

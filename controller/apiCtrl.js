@@ -32,7 +32,19 @@ exports.requestAPI = function (req, res) {
         desc: ""
     }
     console.log(Info);
-    checkSign(Info, res);
+    checkSign(Info, res, function (result) {
+        if (result) {
+            switch (Info.params.ver) {
+                case '1.0':
+                    api_v1[Info.params.method](Info.params);
+                    break;
+            }
+            res.send({
+                status: '0000',
+                message: code['0000']
+            })
+        }
+    });
 }
 
 
@@ -41,7 +53,7 @@ exports.requestAPI = function (req, res) {
  * @author lkj
  * @datetime 2016/8/6
  */
-function checkSign(Info, res) {
+function checkSign(Info, res, callback) {
     //通过appkey查询screct
     var sqlInfo = {
         method: 'checkSign',
@@ -51,6 +63,7 @@ function checkSign(Info, res) {
             appkey: Info.params.system.app_key,
             sign: Info.params.system.app_sign,
             method: Info.params.method,
+            //timestamp: Info.params.timestamp, //时间戳
             params: Info.params.params
         },
         desc: ""
@@ -64,10 +77,10 @@ function checkSign(Info, res) {
             });
         }
         else {
-            if (result.length == 0) {
+            if (result.length == 0) { //
                 res.send({
-                    status: '1005',
-                    message: code['1005']
+                    status: '5005',
+                    message: code['5005']
                 })
                 return;
             }
@@ -76,20 +89,21 @@ function checkSign(Info, res) {
                 console.log('sign:' + sign);
                 console.log(sqlInfo.params.sign);
                 if (sqlInfo.params.sign == sign) { //验证成功
-                    switch (sqlInfo.params.ver) {
-                        case '1.0':
-                            api_v1[sqlInfo.params.method](sqlInfo.params.params, res);
-                            break;
-                    }
-                    res.send({
-                        status: '0000',
-                        message: code['0000']
-                    })
+                    //switch (sqlInfo.params.ver) {
+                    //    case '1.0':
+                    //        api_v1[sqlInfo.params.method](sqlInfo.params.params, res);
+                    //        break;
+                    //}
+                    //res.send({
+                    //    status: '0000',
+                    //    message: code['0000']
+                    //})
+                    callback(true);
                 }
                 else {
                     res.send({
-                        status: '1006',
-                        message: code['1006']
+                        status: '5006',
+                        message: code['5006']
                     })
                     return;
                 }

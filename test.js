@@ -33,6 +33,7 @@ for (var i = 0; i < 10; i++) {
             "notice_text": "消息备注"
         }
     }, function (error, response, result) {
+        console.log(error)
         if (!error && response.statusCode == 200) {
             console.log('ok' + i);
         }
