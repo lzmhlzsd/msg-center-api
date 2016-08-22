@@ -76,7 +76,7 @@ module.exports = {
             }
         });
     },
-    writeNoticeLog: function (msg, type, content, err) {
+    writeNoticeLog: function (msg, type, content, errinfo) {
         var self = this;
         var members = '';
 
@@ -91,9 +91,9 @@ module.exports = {
             type + '","' +
             content + '","' +
             members + '",' +
-            (typeof err != 'undefined' ? 0 : 1) + ',"' +
-            (typeof err != 'undefined' ? JSON.stringify(err) : '') + '")';
-
+            (typeof err != 'undefined' ? 0 : 1) + ",'" +
+            (typeof err != 'undefined' ? JSON.stringify(errinfo) : '') + "')";
+        console.log(JSON.stringify(errinfo));
         var sqlInfo = {
             method: 'writeNoticeLog',
             memo: '插入消息日志',
@@ -122,7 +122,7 @@ module.exports = {
 
                             switch (type) {
                                 case "email":
-                                    if (err) {
+                                    if (errinfo) {
                                         email_fail = 1;
                                     }
                                     else {
@@ -130,7 +130,7 @@ module.exports = {
                                     }
                                     break;
                                 case  "msg":
-                                    if (err) {
+                                    if (errinfo) {
                                         msg_fail = 1;
                                     }
                                     else {
@@ -138,7 +138,7 @@ module.exports = {
                                     }
                                     break;
                                 case  "weixin":
-                                    if (err) {
+                                    if (errinfo) {
                                         weixin_fail = 1;
                                     }
                                     else {
@@ -165,38 +165,38 @@ module.exports = {
                         }
                         else {
                             console.log(result1);
-                            var n_email_success = 0, n_email_fail = 0;
-                            var n_msg_success = 0, n_msg_fail = 0;
-                            var n_weixin_success = 0, n_weixin_fail = 0;
+                            var n_email_success = result1[0].c_email_success, n_email_fail = result1[0].c_email_fail;
+                            var n_msg_success = result1[0].c_msg_success, n_msg_fail = result1[0].c_msg_fail;
+                            var n_weixin_success = result1[0].c_weixin_success, n_weixin_fail = result1[0].c_weixin_fail;
                             switch (type) {
                                 case "email":
-                                    if (err) {
-                                        n_email_fail = result1[0].c_email_fail + 1;
+                                    if (errinfo) {
+                                        n_email_fail++;
                                     }
                                     else {
-                                        n_email_success = result1[0].c_email_success + 1;
+                                        n_email_success++;
                                     }
                                     break;
                                 case  "msg":
-                                    if (err) {
-                                        n_msg_fail = result1[0].c_msg_fail + 1;
+                                    if (errinfo) {
+                                        n_msg_fail++;
                                     }
                                     else {
-                                        n_msg_success = result1[0].c_msg_success + 1;
+                                        n_msg_success++;
                                     }
                                     break;
                                 case  "weixin":
-                                    if (err) {
-                                        n_weixin_fail = result1[0].c_weixin_fail + 1;
+                                    if (errinfo) {
+                                        n_weixin_fail++;
                                     }
                                     else {
-                                        n_weixin_success = result1[0].c_weixin_success + 1;
+                                        n_weixin_success++;
                                     }
                                     break;
                             }
-                            console.log('UPDATE t_notice_total SET c_email_success = '+n_email_success+'', c_email_fail = ?,
-                                c_msg_success = ?, c_msg_fail = ?,
-                                c_weixin_success = ?, c_weixin_fail = ? WHERE c_appkey = ? AND c_date = ?)
+                            console.log('UPDATE t_notice_total SET c_email_success = ' + n_email_success + ',c_email_fail = ' + n_email_fail +
+                            ',c_msg_success = ' + n_msg_success + ',c_msg_fail = ' + n_msg_fail +
+                            ', c_weixin_success = ' + n_weixin_success + ', c_weixin_fail = ' + n_weixin_fail + ' WHERE c_appkey = "' + msg.system.app_key + '" AND c_date = "' + today + '"');
 
                             self.sqlExect('UPDATE t_notice_total SET c_email_success = ?, c_email_fail = ?,\
                                 c_msg_success = ?, c_msg_fail = ?,\
