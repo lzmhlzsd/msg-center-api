@@ -2,7 +2,8 @@
  * Created by lukaijie on 16/5/12.
  */
 var pool = require('./mysql'),
-    logger = require('./logger');
+    logger = require('./logger'),
+    moment = require('moment');
 var u = require("underscore");
 
 
@@ -76,7 +77,7 @@ module.exports = {
         });
     },
     writeNoticeLog: function (msg, type, content, err) {
-
+        var self = this;
         var members = '';
 
         u.each(msg.member, function (item, index) {
@@ -101,13 +102,115 @@ module.exports = {
             },
             desc: '插入消息日志'
         }
-        console.log('INSERT INTO t_notice_log (c_appkey, c_type, c_content, c_notice_to, c_status, c_desc) VALUES ' + sqlInfo.params.insertdata);
-        this.sqlExect('INSERT INTO t_notice_log (c_appkey, c_type, c_content, c_notice_to, c_status, c_desc) VALUES ' + sqlInfo.params.insertdata, null, sqlInfo, function (err, result) {
+        self.sqlExect('INSERT INTO t_notice_log (c_appkey, c_type, c_content, c_notice_to, c_status, c_desc) VALUES ' + sqlInfo.params.insertdata, null, sqlInfo, function (err, result) {
             if (err) {
                 logger.info('插入消息日志：' + JSON.stringify(err));
             }
             else {
+                //update t_notice_total 表中的统计数据
+                var today = moment().format('YYYY-MM-DD');
+                //查询表中是否有当日的记录
+                self.sqlExect('SELECT * FROM t_notice_total WHERE c_appkey = ? AND c_date = ?', [msg.system.app_key, today], null, function (err, result1) {
+                    if (err) {
+                        logger.info('查询表中是否有当日的记录：' + JSON.stringify(err));
+                    }
+                    else {
+                        if (result1.length == 0) {
+                            var email_success = 0, email_fail = 0;
+                            var msg_success = 0, msg_fail = 0;
+                            var weixin_success = 0, weixin_fail = 0;
 
+                            switch (type) {
+                                case "email":
+                                    if (err) {
+                                        email_fail = 1;
+                                    }
+                                    else {
+                                        email_success = 0;
+                                    }
+                                    break;
+                                case  "msg":
+                                    if (err) {
+                                        msg_fail = 1;
+                                    }
+                                    else {
+                                        msg_success = 0;
+                                    }
+                                    break;
+                                case  "weixin":
+                                    if (err) {
+                                        weixin_fail = 1;
+                                    }
+                                    else {
+                                        weixin_success = 0;
+                                    }
+                                    break;
+                            }
+                            var insertdata_total = '("' + msg.system.app_key + '","' +
+                                today + '",' +
+                                email_success + ',' + email_fail + ',' +
+                                msg_success + ',' + msg_fail + ',' +
+                                weixin_success + ',' + weixin_fail + ')';
+                            console.log('INSERT INTO t_notice_total (c_appkey,c_date,c_email_success,c_email_fail,\
+                                c_msg_success,c_msg_fail,c_weixin_success,c_weixin_fail) VALUES ' + insertdata_total);
+                            self.sqlExect('INSERT INTO t_notice_total (c_appkey,c_date,c_email_success,c_email_fail,\
+                                c_msg_success,c_msg_fail,c_weixin_success,c_weixin_fail) VALUES ' + insertdata_total, null, null, function (err, result1) {
+                                if (err) {
+                                    logger.info('消息统计表插入记录：' + JSON.stringify(err));
+                                }
+                                else {
+
+                                }
+                            })
+                        }
+                        else {
+                            console.log(result1);
+                            var n_email_success = 0, n_email_fail = 0;
+                            var n_msg_success = 0, n_msg_fail = 0;
+                            var n_weixin_success = 0, n_weixin_fail = 0;
+                            switch (type) {
+                                case "email":
+                                    if (err) {
+                                        n_email_fail = result1[0].c_email_fail + 1;
+                                    }
+                                    else {
+                                        n_email_success = result1[0].c_email_success + 1;
+                                    }
+                                    break;
+                                case  "msg":
+                                    if (err) {
+                                        n_msg_fail = result1[0].c_msg_fail + 1;
+                                    }
+                                    else {
+                                        n_msg_success = result1[0].c_msg_success + 1;
+                                    }
+                                    break;
+                                case  "weixin":
+                                    if (err) {
+                                        n_weixin_fail = result1[0].c_weixin_fail + 1;
+                                    }
+                                    else {
+                                        n_weixin_success = result1[0].c_weixin_success + 1;
+                                    }
+                                    break;
+                            }
+                            console.log('UPDATE t_notice_total SET c_email_success = '+n_email_success+'', c_email_fail = ?,
+                                c_msg_success = ?, c_msg_fail = ?,
+                                c_weixin_success = ?, c_weixin_fail = ? WHERE c_appkey = ? AND c_date = ?)
+
+                            self.sqlExect('UPDATE t_notice_total SET c_email_success = ?, c_email_fail = ?,\
+                                c_msg_success = ?, c_msg_fail = ?,\
+                                c_weixin_success = ?, c_weixin_fail = ? WHERE c_appkey = ? AND c_date = ?', [n_email_success, n_email_fail,
+                                n_msg_success, n_msg_fail, n_weixin_success, n_weixin_fail, msg.system.app_key, today], null, function (err, result1) {
+                                if (err) {
+                                    logger.info('消息统计表更新记录：' + JSON.stringify(err));
+                                }
+                                else {
+                                }
+                            })
+                        }
+                    }
+                })
             }
         });
     },
