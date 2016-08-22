@@ -3,35 +3,36 @@
  */
 var nodemailer = require('nodemailer'),
     u = require('underscore'),
-    moment = require('moment');
+    moment = require('moment'),
+    utool = require('./utool'),
+    logger = require('../libs/logger');
+
+var API = require('wechat-enterprise').API;
 
 exports.send_notice = function (msg) {
     console.log(msg);
-    var transporter = nodemailer.createTransport({
-        host: msg.user.c_emial_host, //"smtp.qq.com", // 主机
-        secureConnection: true, // 使用 SSL
-        port: msg.user.c_email_port, //465, // SMTP 端口
-        auth: {
-            user: msg.user.c_email_username, //"332847979@qq.com", // 账号
-            pass: msg.user.c_email_password  //"cyokedaiptaicacf" // 密码
-        }
-    });
 
-    console.log(req.session['user'].qyh_cropid);
-    console.log(req.session['user'].qyh_screct);
-    console.log(req.session['user'].qyh_agentid);
-    var api = new API(req.session['user'].qyh_cropid, req.session['user'].qyh_screct, req.session['user'].qyh_agentid);
+    console.log(msg.user.c_weixin_qyh_cropid);
+    console.log(msg.user.c_weixin_qyh_screct);
+    console.log(msg.user.c_weixin_qyh_agentid);
+    var api = new API(msg.user.c_weixin_qyh_cropid, msg.user.c_weixin_qyh_screct, msg.user.c_weixin_qyh_agentid);
 
+    u.templateSettings = {
+        interpolate: /\{\{(.+?)\}\}/g
+    };
+    var template = u.template(msg.templatecontent);
 
     var to = {
-        touser:'',
-        toparty:'',
-        totab:''
-    }, message = {};
-
-    u.each(msg.member, function (value, key) {
-
-    })
+        touser: msg.params.notice_to.join('|'),
+        toparty: '',
+        totab: ''
+    }, message = {
+        msgtype: "text",
+        text: {
+            "content": '【' + msg.user.c_customer + '】' + template(msg.params.notice_data)
+        },
+        safe: "0"
+    };
 
 
     /**
@@ -83,15 +84,18 @@ exports.send_notice = function (msg) {
      * @param {Object} message 消息对象
      * @param {Function} callback 回调函数
      */
-
+    //utool.writeNoticeLog(msg, 'weixin', template(msg.params.notice_data));
     api.send(to, message, function (err, result) {
         if (err) {
             //发送失败
+            utool.writeNoticeLog(msg, 'weixin', template(msg.params.notice_data), err);
             logger.info('发送微信消息：' + JSON.stringify(err));
             return;
         }
         else {
             //发送成功
+            utool.writeNoticeLog(msg, 'weixin', template(msg.params.notice_data));
+            logger.info('微信发送成功');
         }
     });
 }

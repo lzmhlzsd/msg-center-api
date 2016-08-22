@@ -31,10 +31,9 @@ exports.requestAPI = function (req, res) {
         },
         desc: ""
     }
-    console.log(Info);
     checkSign(Info, res, function (result) {
         if (result) {
-            switch (Info.params.ver) {
+            switch (Info.params.system.ver) {
                 case '1.0':
                     api_v1[Info.params.method](Info.params);
                     break;
@@ -68,9 +67,9 @@ function checkSign(Info, res, callback) {
         },
         desc: ""
     }
-    utool.sqlExect('SELECT * FROM t_app WHERE app_key= ?', [sqlInfo.params.appkey], sqlInfo, function (err, result) {
+    utool.sqlExect('SELECT * FROM t_user WHERE c_appkey= ?', [sqlInfo.params.appkey], sqlInfo, function (err, result) {
         if (err) {
-            logger.info('根据用户名查询失败：' + JSON.stringify(err));
+            logger.info('根据appkey查询用户信息：' + JSON.stringify(err));
             res.send({
                 status: '-1000',
                 message: JSON.stringify(err)
@@ -85,9 +84,10 @@ function checkSign(Info, res, callback) {
                 return;
             }
             else {
-                var sign = md5(sqlInfo.params.appkey + result[0].app_screct + sqlInfo.params.method);
-                console.log('sign:' + sign);
-                console.log(sqlInfo.params.sign);
+                //console.log(sqlInfo.params.appkey + result[0].c_appscrect + sqlInfo.params.method)
+                var sign = md5(sqlInfo.params.appkey + result[0].c_appscrect + sqlInfo.params.method);
+                //console.log('sign:' + sign);
+                //console.log(sqlInfo.params.sign);
                 if (sqlInfo.params.sign == sign) { //验证成功
                     //switch (sqlInfo.params.ver) {
                     //    case '1.0':

@@ -70,9 +70,44 @@ module.exports = {
                     }
                     else {
                         callback(null, result);
-
                     }
                 })
+            }
+        });
+    },
+    writeNoticeLog: function (msg, type, content, err) {
+
+        var members = '';
+
+        u.each(msg.member, function (item, index) {
+            members = members + item.c_name;
+            if (index < msg.member.length - 1) {
+                members = members + ',';
+            }
+        })
+
+        var insertdata = '("' + msg.system.app_key + '","' +
+            type + '","' +
+            content + '","' +
+            members + '",' +
+            (typeof err != 'undefined' ? 0 : 1) + ',"' +
+            (typeof err != 'undefined' ? JSON.stringify(err) : '') + '")';
+
+        var sqlInfo = {
+            method: 'writeNoticeLog',
+            memo: '插入消息日志',
+            params: {
+                insertdata: insertdata
+            },
+            desc: '插入消息日志'
+        }
+        console.log('INSERT INTO t_notice_log (c_appkey, c_type, c_content, c_notice_to, c_status, c_desc) VALUES ' + sqlInfo.params.insertdata);
+        this.sqlExect('INSERT INTO t_notice_log (c_appkey, c_type, c_content, c_notice_to, c_status, c_desc) VALUES ' + sqlInfo.params.insertdata, null, sqlInfo, function (err, result) {
+            if (err) {
+                logger.info('插入消息日志：' + JSON.stringify(err));
+            }
+            else {
+
             }
         });
     },
