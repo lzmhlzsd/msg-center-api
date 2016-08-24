@@ -195,8 +195,8 @@ module.exports = {
                                     break;
                             }
                             console.log('UPDATE t_notice_total SET c_email_success = ' + n_email_success + ',c_email_fail = ' + n_email_fail +
-                            ',c_msg_success = ' + n_msg_success + ',c_msg_fail = ' + n_msg_fail +
-                            ', c_weixin_success = ' + n_weixin_success + ', c_weixin_fail = ' + n_weixin_fail + ' WHERE c_appkey = "' + msg.system.app_key + '" AND c_date = "' + today + '"');
+                                ',c_msg_success = ' + n_msg_success + ',c_msg_fail = ' + n_msg_fail +
+                                ', c_weixin_success = ' + n_weixin_success + ', c_weixin_fail = ' + n_weixin_fail + ' WHERE c_appkey = "' + msg.system.app_key + '" AND c_date = "' + today + '"');
 
                             self.sqlExect('UPDATE t_notice_total SET c_email_success = ?, c_email_fail = ?,\
                                 c_msg_success = ?, c_msg_fail = ?,\
@@ -213,6 +213,37 @@ module.exports = {
                 })
             }
         });
+    },
+    checkService: function (servicetype, serviceInfo, callback) {
+        var list = u.where(serviceInfo, {c_serviceid: servicetype});
+        if (list.length > 0) { //存在已经申请的服务信息
+            redis.pub_email(data);
+            //检查是否已经获得该服务
+            if (list[0].c_service_status == 2) {   //已经获得该服务
+                //检查服务时候已经过有效期
+                if (moment().isBefore(list[0].c_dead_time)) {
+                    callback(true);
+                }
+                else {
+                    callback(false, {
+                        service: list[0].c_servicename,
+                        err: '服务已经过期,请重新申请'
+                    });
+                }
+            }
+            else {
+                callback(false, {
+                    service: list[0].c_servicename,
+                    err: '该服务没有审批通过'
+                });
+            }
+        }
+        else {
+            callback(false, {
+                service: list[0].c_servicename,
+                err: '没有申请该服务'
+            });
+        }
     },
     //随机字符串
     randomString: function (len) {

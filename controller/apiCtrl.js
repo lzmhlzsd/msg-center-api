@@ -35,13 +35,13 @@ exports.requestAPI = function (req, res) {
         if (result) {
             switch (Info.params.system.ver) {
                 case '1.0':
-                    api_v1[Info.params.method](Info.params);
+                    api_v1[Info.params.method](Info.params, res);
                     break;
             }
-            res.send({
-                status: '0000',
-                message: code['0000']
-            })
+            //res.send({
+            //    status: '0000',
+            //    message: code['0000']
+            //})
         }
     });
 }

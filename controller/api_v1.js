@@ -4,9 +4,10 @@
 var utool = require('../libs/utool'),
     md5 = require('MD5'),
     redis = require('../libs/redis'),
+    code = require('../libs/errors').code,
     u = require('underscore'),
     logger = require('../libs/logger');
-exports.sendNotice = function (data) {
+exports.sendNotice = function (data, res) {
     var sqlInfo = {
         method: 'sendNotice',
         memo: '查询用户信息',
@@ -59,21 +60,66 @@ exports.sendNotice = function (data) {
                         }
                         else {
                             u.extend(data, {templatecontent: result2[0].c_temp_content});
-                            if (u.indexOf(data.params.type, 'email') >= 0) {
-                                redis.pub_email(data);
-                            }
-                            if (u.indexOf(data.params.type, 'weixin') >= 0) {
-                                redis.pub_weixin(data);
-                            }
-                            if (u.where(data.params.type, 'msg') >= 0) {
-                                redis.pub_msg(data);
-                            }
+                            //校验服务是否可用(时候已获得,并且在有效时间内)
+                            utool.sqlExect('SELECT * FROM t_user_service WHERE c_userid = ?', [data.user.c_userid], sqlInfo, function (err, result3) {
+                                if (err) {
+                                    logger.info('查询服务是否可用：' + JSON.stringify(err));
+                                    res.send({
+                                        status: '-1000',
+                                        message: JSON.stringify(err)
+                                    });
+                                }
+                                else {
+                                    //email: 1; msg: 2; weixin: 3;
+                                    if (u.indexOf(data.params.type, 'email') >= 0) {
+                                        utool.checkService(1, result3, function (flag, msg) {
+                                            if (flag) {
+                                                redis.pub_email(data);
+                                            }
+                                            else {
+                                                res.send({
+                                                    status: '5000',
+                                                    data: msg,
+                                                    message: code['5000']
+                                                })
+                                            }
+                                        })
+                                    }
+                                    if (u.indexOf(data.params.type, 'weixin') >= 0) {
+                                        utool.checkService(2, result3, function (flag, msg) {
+                                            if (flag) {
+                                                redis.pub_weixin(data);
+                                            }
+                                            else {
+                                                res.send({
+                                                    status: '5000',
+                                                    data: msg,
+                                                    message: code['5000']
+                                                })
+                                            }
+                                        })
+                                    }
+                                    if (u.where(data.params.type, 'msg') >= 0) {
+                                        utool.checkService(3, result3, function (flag, msg) {
+                                            if (flag) {
+                                                redis.pub_msg(data);
+                                            }
+                                            else {
+                                                res.send({
+                                                    status: '5000',
+                                                    data: msg,
+                                                    message: code['5000']
+                                                })
+                                            }
+                                        })
+                                    }
+                                }
+                            })
                         }
                     });
-
-
                 }
             });
         }
     });
 }
+
