@@ -87,8 +87,22 @@ module.exports = {
             }
         })
 
+        var from = '';
+        switch (type) {
+            case 'email':
+                from = msg.user.c_email_host;
+                break;
+            case 'msg':
+                from = msg.user.c_msg_apikey;
+                break;
+            case 'weixin':
+                from = msg.user.c_weixin_qyh_cropid;
+                break;
+        }
+
         var insertdata = '("' + msg.system.app_key + '","' +
             type + '","' +
+            from + '","' +
             content + '","' +
             members + '",' +
             (typeof err != 'undefined' ? 0 : 1) + ",'" +
@@ -102,7 +116,7 @@ module.exports = {
             },
             desc: '插入消息日志'
         }
-        self.sqlExect('INSERT INTO t_notice_log (c_appkey, c_type, c_content, c_notice_to, c_status, c_desc) VALUES ' + sqlInfo.params.insertdata, null, sqlInfo, function (err, result) {
+        self.sqlExect('INSERT INTO t_notice_log (c_appkey, c_type, c_from, c_content, c_notice_to, c_status, c_desc) VALUES ' + sqlInfo.params.insertdata, null, sqlInfo, function (err, result) {
             if (err) {
                 logger.info('插入消息日志：' + JSON.stringify(err));
             }
@@ -217,7 +231,7 @@ module.exports = {
     checkService: function (servicetype, serviceInfo, callback) {
         var list = u.where(serviceInfo, {c_serviceid: servicetype});
         if (list.length > 0) { //存在已经申请的服务信息
-            redis.pub_email(data);
+            //redis.pub_email(data);
             //检查是否已经获得该服务
             if (list[0].c_service_status == 2) {   //已经获得该服务
                 //检查服务时候已经过有效期
