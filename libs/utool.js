@@ -90,7 +90,7 @@ module.exports = {
         var from = '';
         switch (type) {
             case 'email':
-                from = msg.user.c_email_host;
+                from = msg.user.c_email_username;
                 break;
             case 'msg':
                 from = msg.user.c_msg_apikey;
