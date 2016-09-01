@@ -10,7 +10,7 @@ var pool = new Pool({
         var c = mysql.createConnection({
             host     : 'localhost',
             user: 'root',
-            password: '',
+            password: '123',
             database: 'msg_center'
         });
 

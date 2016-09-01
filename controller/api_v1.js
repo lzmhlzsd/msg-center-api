@@ -50,6 +50,10 @@ exports.sendNotice = function (data, callback) {
                     callback(err);
                 }
                 else {
+                    if (result1.length == 0) {
+                        //发送人员编号错误
+                        callback(null, '发送人员编号错误', 500);
+                    }
                     u.extend(data, {member: result1});
                     //根据userid 和 templateid 查询模板内容
                     utool.sqlExect('SELECT c_temp_content FROM t_template WHERE c_temp_no = ? AND c_temp_userid = ?', [data.params.notice_tepmlate, data.user.c_userid], sqlInfo, function (err, result2) {
@@ -62,6 +66,10 @@ exports.sendNotice = function (data, callback) {
                             callback(err);
                         }
                         else {
+                            if (result1.length == 0) {
+                                //发送人员编号错误
+                                callback(null, '消息模板编号不存在', 500);
+                            }
                             u.extend(data, {templatecontent: result2[0].c_temp_content});
                             //校验服务是否可用(是否已获得,并且在有效时间内)
                             utool.sqlExect('SELECT * FROM t_user_service WHERE c_userid = ?', [data.user.c_userid], sqlInfo, function (err, result3) {
