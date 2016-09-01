@@ -7,7 +7,7 @@ var utool = require('../libs/utool'),
     code = require('../libs/errors').code,
     u = require('underscore'),
     logger = require('../libs/logger');
-exports.sendNotice = function (data, res) {
+exports.sendNotice = function (data, callback) {
     var sqlInfo = {
         method: 'sendNotice',
         memo: '查询用户信息',
@@ -20,10 +20,11 @@ exports.sendNotice = function (data, res) {
     LEFT JOIN t_config t2 ON t1.c_userid = t2.c_userid WHERE t1.c_appkey = ?', [sqlInfo.params.c_appkey], sqlInfo, function (err, result) {
         if (err) {
             logger.info('查询用户信息：' + JSON.stringify(err));
-            res.send({
-                status: '-1000',
-                message: JSON.stringify(err)
-            });
+            //res.send({
+            //    status: '-1000',
+            //    message: JSON.stringify(err)
+            //});
+            callback(err);
         }
         else {
             //console.log('result :' + result.length)
@@ -42,10 +43,11 @@ exports.sendNotice = function (data, res) {
             utool.sqlExect('SELECT * FROM t_member WHERE c_userno IN (' + userno + ')', null, sqlInfo, function (err, result1) {
                 if (err) {
                     logger.info('查询发送人员的信息：' + JSON.stringify(err));
-                    res.send({
-                        status: '-1000',
-                        message: JSON.stringify(err)
-                    });
+                    //res.send({
+                    //    status: '-1000',
+                    //    message: JSON.stringify(err)
+                    //});
+                    callback(err);
                 }
                 else {
                     u.extend(data, {member: result1});
@@ -53,21 +55,23 @@ exports.sendNotice = function (data, res) {
                     utool.sqlExect('SELECT c_temp_content FROM t_template WHERE c_temp_no = ? AND c_temp_userid = ?', [data.params.notice_tepmlate, data.user.c_userid], sqlInfo, function (err, result2) {
                         if (err) {
                             logger.info('根据userid 和 templateid 查询模板内容：' + JSON.stringify(err));
-                            res.send({
-                                status: '-1000',
-                                message: JSON.stringify(err)
-                            });
+                            //res.send({
+                            //    status: '-1000',
+                            //    message: JSON.stringify(err)
+                            //});
+                            callback(err);
                         }
                         else {
                             u.extend(data, {templatecontent: result2[0].c_temp_content});
-                            //校验服务是否可用(时候已获得,并且在有效时间内)
+                            //校验服务是否可用(是否已获得,并且在有效时间内)
                             utool.sqlExect('SELECT * FROM t_user_service WHERE c_userid = ?', [data.user.c_userid], sqlInfo, function (err, result3) {
                                 if (err) {
                                     logger.info('查询服务是否可用：' + JSON.stringify(err));
-                                    res.send({
-                                        status: '-1000',
-                                        message: JSON.stringify(err)
-                                    });
+                                    //res.send({
+                                    //    status: '-1000',
+                                    //    message: JSON.stringify(err)
+                                    //});
+                                    callback(err);
                                 }
                                 else {
                                     //email: 1; msg: 2; weixin: 3;
@@ -77,11 +81,12 @@ exports.sendNotice = function (data, res) {
                                                 redis.pub_email(data);
                                             }
                                             else {
-                                                res.send({
-                                                    status: '5000',
-                                                    data: msg,
-                                                    message: code['5000']
-                                                })
+                                                //res.send({
+                                                //    status: '5000',
+                                                //    data: msg,
+                                                //    message: code['5000']
+                                                //})
+                                                callback(null, msg, '5000');
                                             }
                                         })
                                     }
@@ -91,11 +96,12 @@ exports.sendNotice = function (data, res) {
                                                 redis.pub_weixin(data);
                                             }
                                             else {
-                                                res.send({
-                                                    status: '5000',
-                                                    data: msg,
-                                                    message: code['5000']
-                                                })
+                                                //res.send({
+                                                //    status: '5000',
+                                                //    data: msg,
+                                                //    message: code['5000']
+                                                //})
+                                                callback(null, msg, '5000');
                                             }
                                         })
                                     }
@@ -105,14 +111,17 @@ exports.sendNotice = function (data, res) {
                                                 redis.pub_msg(data);
                                             }
                                             else {
-                                                res.send({
-                                                    status: '5000',
-                                                    data: msg,
-                                                    message: code['5000']
-                                                })
+                                                //res.send({
+                                                //    status: '5000',
+                                                //    data: msg,
+                                                //    message: code['5000']
+                                                //})
+                                                callback(null, msg, '5000');
                                             }
                                         })
                                     }
+
+                                    callback(null, null, '0000');
                                 }
                             })
                         }
@@ -123,3 +132,7 @@ exports.sendNotice = function (data, res) {
     });
 }
 
+
+//SELECT c_create_time,COUNT(c_create_time)
+//FROM msg_center.t_notice_log  where  c_create_time >='2016-09-01' and c_create_time < '2016-9-2'
+//group by c_create_time

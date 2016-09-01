@@ -100,14 +100,20 @@ module.exports = {
                 break;
         }
 
+        var c_status = 1, c_desc = '';
+        if(errinfo){
+            c_status = 0;
+            c_desc = JSON.stringify(errinfo);
+        }
+
         var insertdata = '("' + msg.system.app_key + '","' +
             type + '","' +
             from + '","' +
             content + '","' +
             members + '",' +
-            (typeof err != 'undefined' ? 0 : 1) + ",'" +
-            (typeof err != 'undefined' ? JSON.stringify(errinfo) : '') + "')";
-        console.log(JSON.stringify(errinfo));
+            c_status + ",'" +
+            c_desc + "')";
+
         var sqlInfo = {
             method: 'writeNoticeLog',
             memo: '插入消息日志',
@@ -116,6 +122,8 @@ module.exports = {
             },
             desc: '插入消息日志'
         }
+
+
         self.sqlExect('INSERT INTO t_notice_log (c_appkey, c_type, c_from, c_content, c_notice_to, c_status, c_desc) VALUES ' + sqlInfo.params.insertdata, null, sqlInfo, function (err, result) {
             if (err) {
                 logger.info('插入消息日志：' + JSON.stringify(err));
