@@ -35,8 +35,9 @@ exports.requestAPI = function (req, res) {
         if (result) {
             switch (Info.params.system.ver) {
                 case '1.0':
-                    api_v1[Info.params.method](Info.params, function (err, data, status_code) {
+                    api_v1[Info.params.method](Info.params, function (err, msg, status_code) {
                         console.log('返回码:', status_code);
+                        console.log(msg);
                         if(err){
                             res.send({
                                 status: '-1000',

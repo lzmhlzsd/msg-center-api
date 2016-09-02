@@ -5,6 +5,7 @@ var utool = require('../libs/utool'),
     md5 = require('MD5'),
     redis = require('../libs/redis'),
     code = require('../libs/errors').code,
+    moment = require('moment'),
     u = require('underscore'),
     logger = require('../libs/logger');
 exports.sendNotice = function (data, callback) {
@@ -25,6 +26,7 @@ exports.sendNotice = function (data, callback) {
             //    message: JSON.stringify(err)
             //});
             callback(err);
+            return;
         }
         else {
             //console.log('result :' + result.length)
@@ -48,11 +50,13 @@ exports.sendNotice = function (data, callback) {
                     //    message: JSON.stringify(err)
                     //});
                     callback(err);
+                    return;
                 }
                 else {
-                    if (result1.length == 0) {
+                    if (result1.length == 0 || result1.length != data.params.notice_to.length) {
                         //发送人员编号错误
-                        callback(null, '发送人员编号错误', 500);
+                        callback(null, '发送人员编号错误', '5000');
+                        return;
                     }
                     u.extend(data, {member: result1});
                     //根据userid 和 templateid 查询模板内容
@@ -64,71 +68,51 @@ exports.sendNotice = function (data, callback) {
                             //    message: JSON.stringify(err)
                             //});
                             callback(err);
+                            return;
                         }
                         else {
-                            if (result1.length == 0) {
-                                //发送人员编号错误
-                                callback(null, '消息模板编号不存在', 500);
+                            if (result2.length == 0) {
+                                //模版编号错误
+                                callback(null, '消息模板编号不存在', '5000');
+                                return;
                             }
-                            u.extend(data, {templatecontent: result2[0].c_temp_content});
+                            u.extend(data, {
+                                templatecontent: result2[0].c_temp_content,
+                                create_time: moment().format('YYYY-MM-DD HH:mm:ss')
+                            });
                             //校验服务是否可用(是否已获得,并且在有效时间内)
                             utool.sqlExect('SELECT * FROM t_user_service WHERE c_userid = ?', [data.user.c_userid], sqlInfo, function (err, result3) {
                                 if (err) {
                                     logger.info('查询服务是否可用：' + JSON.stringify(err));
-                                    //res.send({
-                                    //    status: '-1000',
-                                    //    message: JSON.stringify(err)
-                                    //});
                                     callback(err);
+                                    return;
                                 }
                                 else {
-                                    //email: 1; msg: 2; weixin: 3;
+                                    //email: 1; weixin: 2; msg: 3;
+                                    u.extend(data, {access: result3}); // 服务权限
                                     if (u.indexOf(data.params.type, 'email') >= 0) {
-                                        utool.checkService(1, result3, function (flag, msg) {
-                                            if (flag) {
-                                                redis.pub_email(data);
-                                            }
-                                            else {
-                                                //res.send({
-                                                //    status: '5000',
-                                                //    data: msg,
-                                                //    message: code['5000']
-                                                //})
-                                                callback(null, msg, '5000');
-                                            }
-                                        })
+                                        redis.pub_email(data);
+                                        //utool.checkService(1, result3, function (flag, msg) {
+                                        //    if (flag) {
+                                        //        //redis.pub_email(data);
+                                        //    }
+                                        //    else {
+                                        //        //写日志
+                                        //        utool.writeNoticeLog(data.user, 'email', template(msg.params.notice_data), msg.err);
+                                        //        //console.log('email:' + msg)
+                                        //        callflag = callflag && false;
+                                        //        emialflag = false;
+                                        //        callback(null, msg, '5000');
+                                        //        return;
+                                        //    }
+                                        //})
                                     }
                                     if (u.indexOf(data.params.type, 'weixin') >= 0) {
-                                        utool.checkService(2, result3, function (flag, msg) {
-                                            if (flag) {
-                                                redis.pub_weixin(data);
-                                            }
-                                            else {
-                                                //res.send({
-                                                //    status: '5000',
-                                                //    data: msg,
-                                                //    message: code['5000']
-                                                //})
-                                                callback(null, msg, '5000');
-                                            }
-                                        })
+                                        redis.pub_weixin(data);
                                     }
                                     if (u.where(data.params.type, 'msg') >= 0) {
-                                        utool.checkService(3, result3, function (flag, msg) {
-                                            if (flag) {
-                                                redis.pub_msg(data);
-                                            }
-                                            else {
-                                                //res.send({
-                                                //    status: '5000',
-                                                //    data: msg,
-                                                //    message: code['5000']
-                                                //})
-                                                callback(null, msg, '5000');
-                                            }
-                                        })
+                                        redis.pub_msg(data);
                                     }
-
                                     callback(null, null, '0000');
                                 }
                             })

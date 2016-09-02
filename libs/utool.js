@@ -3,6 +3,7 @@
  */
 var pool = require('./mysql'),
     logger = require('./logger'),
+    services = require('./servicelist').services,
     moment = require('moment');
 var u = require("underscore");
 
@@ -101,7 +102,7 @@ module.exports = {
         }
 
         var c_status = 1, c_desc = '';
-        if(errinfo){
+        if (errinfo) {
             c_status = 0;
             c_desc = JSON.stringify(errinfo);
         }
@@ -112,6 +113,7 @@ module.exports = {
             content + '","' +
             members + '",' +
             c_status + ",'" +
+            msg.create_time + "','" +
             c_desc + "')";
 
         var sqlInfo = {
@@ -124,7 +126,7 @@ module.exports = {
         }
 
 
-        self.sqlExect('INSERT INTO t_notice_log (c_appkey, c_type, c_from, c_content, c_notice_to, c_status, c_desc) VALUES ' + sqlInfo.params.insertdata, null, sqlInfo, function (err, result) {
+        self.sqlExect('INSERT INTO t_notice_log (c_appkey, c_type, c_from, c_content, c_notice_to, c_status, c_create_time, c_desc) VALUES ' + sqlInfo.params.insertdata, null, sqlInfo, function (err, result) {
             if (err) {
                 logger.info('插入消息日志：' + JSON.stringify(err));
             }
@@ -148,7 +150,7 @@ module.exports = {
                                         email_fail = 1;
                                     }
                                     else {
-                                        email_success = 0;
+                                        email_success = 1;
                                     }
                                     break;
                                 case  "msg":
@@ -156,7 +158,7 @@ module.exports = {
                                         msg_fail = 1;
                                     }
                                     else {
-                                        msg_success = 0;
+                                        msg_success = 1;
                                     }
                                     break;
                                 case  "weixin":
@@ -164,7 +166,7 @@ module.exports = {
                                         weixin_fail = 1;
                                     }
                                     else {
-                                        weixin_success = 0;
+                                        weixin_success = 1;
                                     }
                                     break;
                             }
@@ -248,21 +250,21 @@ module.exports = {
                 }
                 else {
                     callback(false, {
-                        service: list[0].c_servicename,
+                        service: services[servicetype],
                         err: '服务已经过期,请重新申请'
                     });
                 }
             }
             else {
                 callback(false, {
-                    service: list[0].c_servicename,
+                    service: services[servicetype],
                     err: '该服务没有审批通过'
                 });
             }
         }
         else {
             callback(false, {
-                service: list[0].c_servicename,
+                service: services[servicetype],
                 err: '没有申请该服务'
             });
         }
