@@ -258,14 +258,14 @@ module.exports = {
             else {
                 callback(false, {
                     service: services[servicetype],
-                    err: services[servicetype] + '该服务没有审批通过'
+                    err: services[servicetype] + '服务没有审批通过'
                 });
             }
         }
         else {
             callback(false, {
                 service: services[servicetype],
-                err: services[servicetype] + '没有申请该服务'
+                err: services[servicetype] + '服务没有申请'
             });
         }
     },
