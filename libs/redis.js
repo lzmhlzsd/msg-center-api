@@ -7,7 +7,7 @@ var redis = new Redis(config.redis);
 var pub = new Redis(config.redis);
 var email = require('./email');
 var weixin = require('./weixin');
-var msg = require('./email');
+var msg = require('./msg');
 
 var u = require('underscore');
 
