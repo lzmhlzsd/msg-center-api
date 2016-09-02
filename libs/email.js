@@ -29,7 +29,7 @@ exports.send_notice = function (msg) {
     //});
     try {
         //校验服务
-        utool.checkService(2, msg.access, function (flag, message) {
+        utool.checkService(1, msg.access, function (flag, errInfo) {
             var transporter = nodemailer.createTransport({
                 host: msg.user.c_email_host, //"smtp.qq.com", // 主机
                 secureConnection: true, // 使用 SSL
@@ -72,7 +72,7 @@ exports.send_notice = function (msg) {
                 });
             }
             else {
-                utool.writeNoticeLog(msg, 'email', template(msg.params.notice_data), message.err);
+                utool.writeNoticeLog(msg, 'email', template(msg.params.notice_data), errInfo.err);
             }
         });
     }

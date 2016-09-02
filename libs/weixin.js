@@ -17,7 +17,7 @@ exports.send_notice = function (msg) {
     console.log(msg.user.c_weixin_qyh_agentid);
     try {
         //校验服务
-        utool.checkService(2, msg.access, function (flag, message) {
+        utool.checkService(3, msg.access, function (flag, errInfo) {
             var api = new API(msg.user.c_weixin_qyh_cropid, msg.user.c_weixin_qyh_screct, msg.user.c_weixin_qyh_agentid);
 
             u.templateSettings = {
@@ -105,7 +105,7 @@ exports.send_notice = function (msg) {
             }
             else {
                 //失败
-                utool.writeNoticeLog(msg, 'weixin', template(msg.params.notice_data), message.err);
+                utool.writeNoticeLog(msg, 'weixin', template(msg.params.notice_data), errInfo.err);
             }
         });
 

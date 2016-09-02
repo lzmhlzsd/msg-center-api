@@ -251,21 +251,21 @@ module.exports = {
                 else {
                     callback(false, {
                         service: services[servicetype],
-                        err: '服务已经过期,请重新申请'
+                        err: services[servicetype] + '服务已经过期,请重新申请'
                     });
                 }
             }
             else {
                 callback(false, {
                     service: services[servicetype],
-                    err: '该服务没有审批通过'
+                    err: services[servicetype] + '该服务没有审批通过'
                 });
             }
         }
         else {
             callback(false, {
                 service: services[servicetype],
-                err: '没有申请该服务'
+                err: services[servicetype] + '没有申请该服务'
             });
         }
     },

@@ -88,8 +88,9 @@ exports.sendNotice = function (data, callback) {
                                     return;
                                 }
                                 else {
-                                    //email: 1; weixin: 2; msg: 3;
+                                    //email: 1; msg: 2; weixin: 3;
                                     u.extend(data, {access: result3}); // 服务权限
+                                    console.log(result3)
                                     if (u.indexOf(data.params.type, 'email') >= 0) {
                                         redis.pub_email(data);
                                         //utool.checkService(1, result3, function (flag, msg) {
