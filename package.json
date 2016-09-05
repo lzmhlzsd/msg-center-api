@@ -45,6 +45,7 @@
     "swagger-ui": "git+https://github.com/swagger-api/swagger-ui.git",
     "underscore": "^1.8.3",
     "webpack": "^1.13.1",
-    "webpack-dev-server": "^1.14.1"
+    "webpack-dev-server": "^1.14.1",
+    "yunpian-sms-client": "^2.0.1"
   }
 }

@@ -41,7 +41,8 @@ exports.send_notice = function (msg) {
             });
 
             u.templateSettings = {
-                interpolate: /\{\{(.+?)\}\}/g
+                //interpolate: /\{\{(.+?)\}\}/g
+                interpolate: /\#(.+?)\#/g
             };
             var template = u.template(msg.templatecontent);
 
@@ -56,7 +57,7 @@ exports.send_notice = function (msg) {
                 to: emailto.toString(), // list of receivers
                 subject: msg.params.notice_subject, // Subject line
                 text: msg.params.notice_subject + '(' + msg.params.notice_text + ')', // plaintext body
-                html: template(msg.params.notice_data) // html body
+                html: template(msg.params.notice_data) + '<br><br>【' + msg.user.c_customer + '】' // html body
             };
             console.log(mailOptions)
 

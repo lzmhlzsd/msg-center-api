@@ -21,7 +21,8 @@ exports.send_notice = function (msg) {
             var api = new API(msg.user.c_weixin_qyh_cropid, msg.user.c_weixin_qyh_screct, msg.user.c_weixin_qyh_agentid);
 
             u.templateSettings = {
-                interpolate: /\{\{(.+?)\}\}/g
+                //interpolate: /\{\{(.+?)\}\}/g
+                interpolate: /\#(.+?)\#/g
             };
             var template = u.template(msg.templatecontent);
 
