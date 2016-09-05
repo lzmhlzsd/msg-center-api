@@ -78,6 +78,6 @@ exports.send_notice = function (msg) {
         });
     }
     catch (e) {
-        utool.writeNoticeLog(msg, 'weixin', '', e.toString());
+        utool.writeNoticeLog(msg, 'email', '', e.toString());
     }
 }

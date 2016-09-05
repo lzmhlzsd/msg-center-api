@@ -111,7 +111,7 @@ exports.sendNotice = function (data, callback) {
                                     if (u.indexOf(data.params.type, 'weixin') >= 0) {
                                         redis.pub_weixin(data);
                                     }
-                                    if (u.where(data.params.type, 'msg') >= 0) {
+                                    if (u.indexOf(data.params.type, 'msg') >= 0) {
                                         redis.pub_msg(data);
                                     }
                                     callback(null, null, '0000');
