@@ -35,21 +35,30 @@ exports.requestAPI = function (req, res) {
         if (result) {
             switch (Info.params.system.ver) {
                 case '1.0':
-                    api_v1[Info.params.method](Info.params, function (err, msg, status_code) {
+                    api_v1[Info.params.method](Info.params, function (err, msg, status_code, data) {
                         console.log('返回码:', status_code);
                         console.log(msg);
-                        if(err){
+                        if (err) {
                             res.send({
                                 status: '-1000',
                                 message: JSON.stringify(err)
                             });
                         }
-                        else{
-                            if(status_code == '0000'){
-                                res.send({
-                                    status: status_code,
-                                    message: code[status_code]
-                                })
+                        else {
+                            if (status_code == '0000') {
+                                if (typeof  data != 'undefined') {
+                                    res.send({
+                                        status: status_code,
+                                        data: data,
+                                        message: code[status_code]
+                                    })
+                                }
+                                else {
+                                    res.send({
+                                        status: status_code,
+                                        message: code[status_code]
+                                    })
+                                }
                             }
                             else {
                                 res.send({
